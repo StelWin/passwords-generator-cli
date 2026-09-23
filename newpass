@@ -1,0 +1,42 @@
+#!/bin/bash
+# newpass — secure passwords that are easy to type on a phone.
+#
+#   $ newpass
+#   uvufag-Jau3uv-3kanfF-sju3gs
+#
+# Four groups of six characters. Mostly lowercase, so capitals and digits are
+# rare and you seldom switch keyboards, yet every password contains at least one
+# of each. Look-alike characters (i l o I L O 0) are never used.
+# Strength: ~128 bits of entropy, drawn from /dev/urandom.
+
+set -eu
+
+lower=abcdefghjkmnpqrstuvwxyz   # no i l o
+upper=ABCDEFGHJKMNPQRSTUVWXYZ   # no I L O
+digits=123456789                # no 0
+
+# Weighted pool: 7 parts lowercase, 1 part uppercase, 2 parts digits.
+pool=$lower$lower$lower$lower$lower$lower$lower$upper$digits$digits
+size=${#pool}
+length=24
+
+random_chars() {
+  chars=""
+  while [ ${#chars} -lt $length ]; do
+    for byte in $(od -An -tu1 -N64 /dev/urandom); do
+      [ "$byte" -lt "$size" ] || continue   # reject out-of-range bytes to stay unbiased
+      chars=$chars${pool:byte:1}
+      [ ${#chars} -eq $length ] && break
+    done
+  done
+}
+
+# Draw again until the password has at least one capital and one digit.
+while :; do
+  random_chars
+  case $chars in *["$upper"]*) ;; *) continue ;; esac
+  case $chars in *["$digits"]*) ;; *) continue ;; esac
+  break
+done
+
+echo "${chars:0:6}-${chars:6:6}-${chars:12:6}-${chars:18:6}"
