@@ -15,7 +15,7 @@ uvufag-Jau3uv-3kanfF-sju3gs
 ## Install
 
 ```
-git clone https://github.com/StelWin/passwords-generator.git
+git clone https://github.com/StelWin/passwords-generator-cli.git
 ln -s "$PWD/passwords-generator/newpass" ~/.local/bin/newpass
 ```
 
